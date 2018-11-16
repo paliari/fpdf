@@ -527,6 +527,22 @@ class Fpdf
         }
     }
 
+    /**
+     * Change font style.
+     *
+     * Alias to $this->setFont($this->fontFamily, $style, $this->fontSize)
+     *
+     * @param string $style (B, U, I)
+     *
+     * @return $this
+     */
+    public function setFontStyle($style)
+    {
+        $this->setFont($this->fontFamily, $style, $this->fontSize);
+
+        return $this;
+    }
+
     public function addLink()
     {
         $n               = count($this->links) + 1;
