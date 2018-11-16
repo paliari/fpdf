@@ -14,5 +14,7 @@
             "Pdf\\": "src"
         }
     },
-    "require": {}
+    "require": {
+        "paliari/php-utils": "^1.1"
+    }
 }
