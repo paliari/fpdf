@@ -9,5 +9,10 @@
             "email": "marcos@paliari.com.br"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "Pdf\\": "src"
+        }
+    },
     "require": {}
 }
