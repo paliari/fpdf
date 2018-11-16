@@ -15,7 +15,7 @@
             "Fpdf\\": "src"
         }
     },
-    "require": {
+    "require-dev": {
         "paliari/php-utils": "^1.1"
     }
 }
