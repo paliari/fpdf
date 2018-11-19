@@ -569,6 +569,7 @@ class Fpdf
 
     public function text($x, $y, $txt)
     {
+        $txt = $this->convertTxt($txt);
         if (!isset($this->currentFont)) {
             $this->error('No font has been set');
         }
@@ -589,7 +590,8 @@ class Fpdf
 
     public function cell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = false, $link = '')
     {
-        $k = $this->k;
+        $txt = $this->convertTxt($txt);
+        $k   = $this->k;
         if ($this->y + $h > $this->pageBreakTrigger && !$this->inHeader && !$this->inFooter && $this->acceptPageBreak()) {
             // Automatic page break
             $x  = $this->x;
@@ -675,6 +677,7 @@ class Fpdf
 
     public function multiCell($w, $h, $txt, $border = 0, $align = 'J', $fill = false)
     {
+        $txt = $this->convertTxt($txt);
         if (!isset($this->currentFont)) {
             $this->error('No font has been set');
         }
@@ -781,6 +784,7 @@ class Fpdf
 
     public function write($h, $txt, $link = '')
     {
+        $txt = $this->convertTxt($txt);
         if (!isset($this->currentFont)) {
             $this->error('No font has been set');
         }
@@ -1895,6 +1899,29 @@ class Fpdf
         $this->_put($offset);
         $this->_put('%%EOF');
         $this->state = 3;
+    }
+
+    protected function convertTxt($txt)
+    {
+        if ($this->isUtf8($txt)) {
+            $txt = utf8_decode($txt);
+        }
+
+        return $txt;
+    }
+
+    protected function isUtf8($string)
+    {
+        return preg_match('%^(?:
+		  [\x09\x0A\x0D\x20-\x7E]			# ASCII
+		| [\xC2-\xDF][\x80-\xBF]			# non-overlong 2-byte
+		|  \xE0[\xA0-\xBF][\x80-\xBF]		# excluding overlongs
+		| [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2} # straight 3-byte
+		|  \xED[\x80-\x9F][\x80-\xBF]		# excluding surrogates
+		|  \xF0[\x90-\xBF][\x80-\xBF]{2}	# planes 1-3
+		| [\xF1-\xF3][\x80-\xBF]{3}		 	# planes 4-15
+		|  \xF4[\x80-\x8F][\x80-\xBF]{2}	# plane 16
+	)*$%xs', $string);
     }
 
 }
