@@ -1828,7 +1828,7 @@ class Fpdf
         }
     }
 
-    protected function _putresourcedict()
+    protected function _putresourcedictNoAlpha()
     {
         $this->_put('/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
         $this->_put('/Font <<');
@@ -1841,7 +1841,7 @@ class Fpdf
         $this->_put('>>');
     }
 
-    protected function _putresources()
+    protected function _putresourcesNoAlpha()
     {
         $this->_putfonts();
         $this->_putimages();
@@ -1954,6 +1954,67 @@ class Fpdf
 		| [\xF1-\xF3][\x80-\xBF]{3}		 	# planes 4-15
 		|  \xF4[\x80-\x8F][\x80-\xBF]{2}	# plane 16
 	)*$%xs', $string);
+    }
+
+    protected $extgstates = [];
+
+    /**
+     * alpha: real value from 0 (transparent) to 1 (opaque)
+     * bm:    blend mode, one of the following:
+     *          Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn,
+     *          HardLight, SoftLight, Difference, Exclusion, Hue, Saturation, Color, Luminosity
+     *
+     * @param        $alpha
+     * @param string $bm
+     */
+    public function setAlpha($alpha, $bm = 'Normal')
+    {
+        // set alpha for stroking (CA) and non-stroking (ca) operations
+        $gs = $this->addExtGState(['ca' => $alpha, 'CA' => $alpha, 'BM' => '/' . $bm]);
+        $this->setExtGState($gs);
+    }
+
+    public function addExtGState($parms)
+    {
+        $n                             = count($this->extgstates) + 1;
+        $this->extgstates[$n]['parms'] = $parms;
+
+        return $n;
+    }
+
+    public function setExtGState($gs)
+    {
+        $this->_out(sprintf('/GS%d gs', $gs));
+    }
+
+    function _putextgstates()
+    {
+        for ($i = 1; $i <= count($this->extgstates); $i++) {
+            $this->_newobj();
+            $this->extgstates[$i]['n'] = $this->n;
+            $this->_out('<</Type /ExtGState');
+            $parms = $this->extgstates[$i]['parms'];
+            $this->_out(sprintf('/ca %.3F', $parms['ca']));
+            $this->_out(sprintf('/CA %.3F', $parms['CA']));
+            $this->_out('/BM ' . $parms['BM']);
+            $this->_out('>>');
+            $this->_out('endobj');
+        }
+    }
+
+    protected function _putresourcedict()
+    {
+        $this->_putresourcedictNoAlpha();
+        $this->_out('/ExtGState <<');
+        foreach ($this->extgstates as $k => $extgstate)
+            $this->_out('/GS' . $k . ' ' . $extgstate['n'] . ' 0 R');
+        $this->_out('>>');
+    }
+
+    protected function _putresources()
+    {
+        $this->_putextgstates();
+        $this->_putresourcesNoAlpha();
     }
 
 }
