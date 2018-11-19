@@ -538,7 +538,24 @@ class Fpdf
      */
     public function setFontStyle($style)
     {
-        $this->setFont($this->fontFamily, $style, $this->fontSize);
+        $this->setFont($this->fontFamily, $style, $this->fontSizePt);
+
+        return $this;
+    }
+
+    /**
+     * Change font style and size.
+     *
+     * Alias to $this->setFont($this->fontFamily, $style, $this->fontSize)
+     *
+     * @param string $style (B, U, I)
+     * @param int    $size
+     *
+     * @return $this
+     */
+    public function setFontStyleSize($style, $size)
+    {
+        $this->setFont($this->fontFamily, $style, $size);
 
         return $this;
     }
