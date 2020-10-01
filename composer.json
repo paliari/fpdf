@@ -17,5 +17,9 @@
     },
     "require-dev": {
         "paliari/php-utils": "^1.1"
+    },
+    "require": {
+        "ext-mbstring": "*",
+        "ext-gd": "*"
     }
 }
